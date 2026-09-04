@@ -1,0 +1,3 @@
+{"sessionId":"8828e5","runId":"pre-fix","hypothesisId":"A","location":"app.js:2","message":"App boot","data":{"hasThree":true,"userAgent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/14"},"timestamp":1776885694891}
+{"sessionId":"8828e5","runId":"pre-fix","hypothesisId":"B","location":"app.js:215","message":"Setup complete","data":{"cspReady":true,"hasInlineScripts":false},"timestamp":1776885695020}
+{"sessionId":"8828e5","runId":"pre-fix","hypothesisId":"A","location":"app.js:92","message":"News rendered safely","data":{"items":10,"validUrls":10},"timestamp":1776885696409}
