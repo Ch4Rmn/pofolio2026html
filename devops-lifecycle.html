@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevOps Lifecycle Phases & Categorized Toolchains | Lin Htut Kyaw</title>
+  <link rel="shortcut icon" href="profile.jpg" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/index.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.1.0/index.min.css">
+  <style>
+    :root {
+      --bg: #050507;
+      --bg-panel: #0d0d11;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --accent: #3b82f6;
+      --border: rgba(255, 255, 255, 0.06);
+      --font-main: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+      --header-h: 60px;
+    }
+    [data-theme="light"] {
+      --bg: #fafafa;
+      --bg-panel: #ffffff;
+      --text: #09090b;
+      --text-muted: #52525b;
+      --accent: #2563eb;
+      --border: rgba(0, 0, 0, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-main); transition: background 0.4s, color 0.4s; overflow-x: hidden; }
+    
+    #bg3d { position: fixed; inset: 0; z-index: -1; opacity: 0.5; pointer-events: none; }
+    
+    header {
+      position: fixed; top: 0; left: 0; right: 0; height: var(--header-h);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 clamp(1.5rem, 4vw, 4rem);
+      background: rgba(var(--bg), 0.75);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      transition: background 0.4s;
+    }
+    .clock { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.05em; }
+    .nav { display: flex; gap: 1.5rem; align-items: center; }
+    .nav a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.2s; }
+    .nav a:hover { color: var(--accent); }
+    .actions { display: flex; gap: 0.5rem; align-items: center; }
+    .btn-icon {
+      width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+      border-radius: 8px; background: transparent; border: 1px solid var(--border);
+      color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+    }
+    .btn-icon:hover { background: var(--bg-panel); color: var(--accent); border-color: var(--accent); }
+
+    main { padding-top: calc(var(--header-h) + 4rem); max-width: 900px; margin: 0 auto; padding-inline: clamp(1.5rem, 4vw, 4rem); padding-bottom: 6rem; }
+    
+    .article-header { margin-bottom: 3rem; }
+    .article-header h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; line-height: 1.1; margin-bottom: 1rem; }
+    .article-meta { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .article-meta span { display: inline-block; margin-right: 1.5rem; }
+    
+    .btn { padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 500; text-decoration: none; transition: all 0.2s; cursor: pointer; border: none; font-family: inherit; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { filter: brightness(1.1); transform: translateY(-2px); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--text); background: rgba(128,128,128,0.04); }
+
+    .phase-section { margin-bottom: 4rem; }
+    .phase-header { 
+      display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; 
+      padding-bottom: 0.8rem; border-bottom: 1px solid var(--border);
+    }
+    .phase-number { 
+      font-family: var(--font-mono); font-size: 0.9rem; color: var(--accent); 
+      font-weight: 700; padding: 0.3rem 0.8rem; background: var(--bg-panel); 
+      border: 1px solid var(--border); border-radius: 6px;
+    }
+    .phase-title { font-size: 1.5rem; font-weight: 700; }
+    
+    .category { margin-bottom: 2rem; }
+    .category-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text); }
+    .category-desc { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 0.8rem; }
+    .category-tools { 
+      display: flex; flex-wrap: wrap; gap: 0.5rem; 
+    }
+    .tool-tag { 
+      padding: 0.3rem 0.7rem; background: var(--bg-panel); border: 1px solid var(--border); 
+      border-radius: 6px; font-family: var(--font-mono); font-size: 0.75rem; 
+      color: var(--text-muted); transition: 0.2s;
+    }
+    .tool-tag:hover { border-color: var(--accent); color: var(--accent); }
+
+    .comparison-table { 
+      width: 100%; border-collapse: collapse; margin: 2rem 0; 
+      background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+    }
+    .comparison-table th, .comparison-table td { 
+      padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); 
+    }
+    .comparison-table th { 
+      background: var(--bg); font-weight: 600; font-size: 0.85rem; 
+      color: var(--text-muted); font-family: var(--font-mono);
+    }
+    .comparison-table tr:last-child td { border-bottom: none; }
+    .comparison-table td { font-size: 0.9rem; color: var(--text-muted); }
+    .comparison-table td:first-child { font-weight: 600; color: var(--text); }
+
+    .senior-section { 
+      background: var(--bg-panel); border: 1px solid var(--border); 
+      border-radius: 12px; padding: 2rem; margin: 3rem 0;
+    }
+    .senior-section h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent); }
+    .senior-section p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 1rem; }
+    .senior-section ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+    .senior-section li { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 0.5rem; }
+
+    .mistakes-section { 
+      background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); 
+      border-radius: 12px; padding: 2rem; margin: 3rem 0;
+    }
+    .mistakes-section h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; color: #ef4444; }
+    .mistakes-section p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 1rem; }
+
+    .references-section { 
+      background: var(--bg-panel); border: 1px solid var(--border); 
+      border-radius: 12px; padding: 1.5rem; margin: 3rem 0;
+    }
+    .references-section h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; }
+    .references-section a { 
+      display: block; color: var(--accent); text-decoration: none; 
+      font-size: 0.9rem; margin-bottom: 0.5rem; transition: 0.2s;
+    }
+    .references-section a:hover { text-decoration: underline; }
+
+    .flow-diagram { 
+      background: var(--bg-panel); border: 1px solid var(--border); 
+      border-radius: 12px; padding: 2rem; margin: 2rem 0; font-family: var(--font-mono);
+      font-size: 0.85rem; color: var(--text-muted); line-height: 1.8; overflow-x: auto;
+    }
+
+    @media(max-width: 768px) {
+      .nav { display: none; }
+      .comparison-table { font-size: 0.8rem; }
+      .comparison-table th, .comparison-table td { padding: 0.75rem 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg3d"></canvas>
+
+  <header>
+    <div class="clock" id="clock">00:00:00</div>
+    <nav class="nav">
+      <a href="index.html">Home</a>
+      <a href="#about">About</a>
+      <a href="#experience">Experience</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="actions">
+      <a href="https://github.com/Ch4Rmn" target="_blank" class="btn-icon" aria-label="GitHub">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+      </a>
+      <button class="btn-icon" id="theme-toggle" aria-label="Toggle theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div class="article-header">
+      <a href="index.html" class="btn btn-outline" style="margin-bottom: 1.5rem;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Home
+      </a>
+      <h1>DevOps Lifecycle Phases & Categorized Toolchains: Complete Architectural Breakdown</h1>
+      <div class="article-meta">
+        <span>📅 Monday, September 14, 2026, 11:00 AM (Asia/Yangon)</span>
+        <span>🏷️ DevOps, Architecture, Toolchains</span>
+      </div>
+    </div>
+
+    <section style="margin-bottom: 3rem;">
+      <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.8; margin-bottom: 1.5rem;">
+        ပုံထဲတွင် ဖော်ပြထားသော ပုံကြမ်းသည် Software တစ်ခုကို စိတ်ကူးစတင်ချိန်မှစ၍ သုံးစွဲသူများထံ အောင်မြင်စွာ ရောက်ရှိကာ လည်ပတ်နေသည်အထိ လိုအပ်သော DevOps Lifecycle (ဘဝစက်ဝန်း အဆင့် ၅ ဆင့်) နှင့် ထိုအဆင့်များအောက်ရှိ အဓိက ကဏ္ဍခွဲများ (Sub-headers / Functional Categories) အားလုံးကို ပြသထားခြင်း ဖြစ်ပါသည်။
+      </p>
+      <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.8;">
+        အဆင့်ကြီး (၅) ဆင့် ဖြစ်သော Collaborate → Build → Test → Deploy → Run အောက်ရှိ ခေါင်းစဉ်တစ်ခုချင်းစီ၏ ရည်ရွယ်ချက်၊ သဘောတရားနှင့် အင်ဂျင်နီယာပိုင်းဆိုင်ရာ အရေးကြီးအချက်များကို အောက်ပါအတိုင်း အသေးစိတ် ရှင်းလင်းပြပါမည်။
+      </p>
+    </section>
+
+    <section class="phase-section">
+      <div class="phase-header">
+        <span class="phase-number">01</span>
+        <h2 class="phase-title">Collaborate (ပူးပေါင်းဆောင်ရွက်ခြင်း အဆင့်)</h2>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.7; margin-bottom: 2rem;">
+        ဆော့ဖ်ဝဲလ် ရေးသားခြင်း မစတင်မီ လူသားများအချင်းချင်း လုပ်ငန်းစဉ်များ စီစဉ်ခြင်း၊ ဆက်သွယ်ခြင်းနှင့် ဗဟုသုတများ မျှဝေခြင်း ပြုလုပ်သော အဆင့် ဖြစ်ပါသည်။
+      </p>
+
+      <div class="category">
+        <h3 class="category-title">Application Lifecycle Mgmt. (ALM / Project Tracking)</h3>
+        <p class="category-desc">အဓိပ္ပာယ်: Feature အသစ်များ၊ Bug ပြဿနာများနှင့် Developer များ လုပ်ဆောင်ရမည့် Task များကို စီမံခန့်ခွဲခြင်း (Agile/Scrum Board) ဖြစ်သည်။</p>
+        <div class="category-tools">
+          <span class="tool-tag">JIRA</span>
+          <span class="tool-tag">Trello</span>
+          <span class="tool-tag">Asana</span>
+          <span class="tool-tag">Basecamp</span>
+          <span class="tool-tag">Pivotal Tracker</span>
+        </div>
+      </div>
+
+      <div class="category">
+        <h3 class="category-title">Communication & ChatOps (အဖွဲ့တွင်း ဆက်သွယ်ရေးနှင့် အလိုအလျောက် စနစ်)</h3>
+        <p class="category-desc">အဓိပ္ပာယ်: Developer များနှင့် Operations သမားများ စကားပြောဆိုနိုင်ရုံသာမက Chat ထဲမှနေ၍ Bot များကို ခိုင်းကာ Deployment အခြေအနေကြည့်ခြင်း၊ Server Alert လက်ခံခြင်း (ChatOps) ပြုလုပ်သော နေရာဖြစ်သည်။</p>
+        <div class="category-tools">
+          <span class="tool-tag">Slack</span>
+          <span class="tool-tag">Microsoft Teams</span>
+          <span class="tool-tag">Mattermost</span>
+          <span class="tool-tag">Discord</span>
+          <span class="tool-tag">IRC</span>
+        </div>
+      </div>
+
+      <div class="category">
+        <h3 class="category-title">Knowledge Sharing (ဗဟုသုတနှင့် စနစ်မှတ်တမ်းများ ထိန်းသိမ်းခြင်း)</h3>
+        <p class="category-desc">အဓိပ္ပာယ်: API Documentation, Architecture Diagram, Onboarding Guides များကို တစ်နေရာတည်းတွင် စုစည်းမှတ်တမ်းတင်ထားသော စနစ်ဖြစ်ပါသည်။</p>
+        <div class="category-tools">
+          <span class="tool-tag">Confluence</span>
+          <span class="tool-tag">GitHub Pages</span>
+          <span class="tool-tag">Hugo</span>
+          <span class="tool-tag">Jekyll</span>
+          <span class="tool-tag">Read the Docs</span>
+          <span class="tool-tag">OpenAPI (Swagger)</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="phase-section">
+      <div class="phase-header">
+        <span class="phase-number">02</span>
+        <h2 class="phase-title">Build (ကုဒ်ရေးသားတည်ဆောက်ခြင်း အဆင့်)</h2>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.7; margin-bottom: 2rem;">
+        Developer များ ရေးသားလိုက်သော Source Code များကို အချောထည်အဖြစ် စတင် ပေါင်းစည်းတည်ဆောက်သည့် အဆင့် ဖြစ်ပါသည်။
+      </p>
+
+      <div class="category">
+        <h3 class="category-title">SCM / VCS (Source Code Management / Version Control System)</h3>
+        <p class="category-desc">အဓိပ္ပာယ်: ရေးသားထားသော Code များကို သမိုင်းကြောင်းနှင့်တကွ မှတ်တမ်းတင်ပေးပြီး အဖွဲ့သားများ Branch ခွဲ၍ အတူတကွ ရေးသားနိုင်သော ဗဟိုနေရာ ဖြစ်သည်။</p>
+        <div class="category-tools">
+          <span class="tool-tag">Git</span>
+          <span class="tool-tag">GitHub</span>
+          <span class="tool-tag">GitLab</span>
+          <span class="tool-tag">Bitbucket</span>
+          <span class="tool-tag">Subversion (SVN)</span>
+          <span class="tool-tag">Mercurial</span>
+        </div>
+      </div>
+
+      <div class="category">
+        <h3 class="category-title">CI (Continuous Integration)</h3>
+        <p class="category-desc">အဓိပ္ပာယ်: Developer တစ်ဦးက Code ကို Git ပေါ်သို့ Push လုပ်လိုက်သည်နှင့် နောက်ကွယ်မှ အလိုအလျောက် Test စစ်ပေးခြင်း၊ Build လုပ်ပေးခြင်းတို့ကို တာဝန်ယူသည့် Automation Engine ဖြစ်သည်။</p>
+        <div class="category-tools">
+          <span class="tool-tag">Jenkins</span>
+          <span class="tool-tag">GitHub Actions</span>
+          <span class="tool-tag">GitLab CI</span>
+          <span class="tool-tag">CircleCI</span>
+          <span class="tool-tag">TeamCity</span>
+          <span class="tool-tag">Bamboo</span>
+          <span class="tool-tag">Travis CI</span>
+        </div>
+      </div>
+
+      <div class="category">
+        <h3 class="category-title">Build Tools (Compiler & Container Packager)</h3>
+        <p class="category-desc">အဓိပ္ပာယ်: Raw Code ဖိုင်များကို ကွန်ပျူတာ အမှန်တကယ် နားလည်ပြီး Run နိုင်သော Binary သို့မဟုတ် Docker Container အဖြစ် ထုပ်ပိုးပေးသည့် စနစ်များ ဖြစ်သည်။</p>
+        <div class="category-tools">
+          <span class="tool-tag">Docker (Container Build)</span>
+          <span class="tool-tag">Maven/Gradle (Java)</span>
+          <span class="tool-tag">npm/yarn (JavaScript)</span>
+          <span class="tool-tag">Packer (Machine Images)</span>
+          <span class="tool-tag">Make</span>
+          <span class="tool-tag">Ant</span>
+        </div>
+      </div>
+
+      <div class="category">
+        <h3 class="category-title">Database Management (Schema Migration)</h3>
+        <p class="category-desc">အဓိပ္ပာယ်: Code အသစ်ပြောင်းလဲသည့်အခါ Database Schema (Tables, Columns) များပါ အလိုအလျောက် အဆင့်ဆင့် ပြောင်းလဲသွားစေရန် ထိန်းကျောင်းပေးသည့် Version Control စနစ် ဖြစ်သည်။</p>
+        <div class="category-tools">
+          <span class="tool-tag">Flyway</span>
+          <span class="tool-tag">Liquibase</span>
+          <span class="tool-tag">DBmaestro</span>
+          <span class="tool-tag">Laravel Migrations</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="phase-section">
+      <div class="phase-header">
+        <span class="phase-number">03</span>
+        <h2 class="phase-title">Test (စမ်းသပ်စစ်ဆေးခြင်း အဆင့်)</h2>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.7; margin-bottom: 2rem;">
+        Code များသည် Error ကင်းစင်ပြီး လုပ်ဆောင်ချက် မှန်ကန်စေရန် အလိုအလျောက် စမ်းသပ်သည့် အဆင့် ဖြစ်ပါသည်။
+      </p>
+
+      <div class="category">
+        <h3 class="category-title">Testing (အလိုအလျောက် အရည်အသွေး စစ်ဆေးရေး ကဏ္ဍ)</h3>
+        <p class="category-desc">ဤကဏ္ဍတွင် စမ်းသပ်မှု ပုံစံအမျိုးမျိုး ပေါင်းစပ်ပါဝင်ပါသည်-</p>
+        <div class="category-tools">
+          <span class="tool-tag">Unit Testing: JUnit, pytest, PHPUnit, Jasmine/Karma</span>
+          <span class="tool-tag">End-to-End / UI Testing: Selenium, Cypress, Playwright</span>
+          <span class="tool-tag">Behavior Driven (BDD): Cucumber, SpecFlow</span>
+          <span class="tool-tag">Performance & Load Testing: Apache JMeter, Gatling, BlazeMeter, Locust</span>
+          <span class="tool-tag">Security Testing: OWASP ZAP, SonarQube, Snyk</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="phase-section">
+      <div class="phase-header">
+        <span class="phase-number">04</span>
+        <h2 class="phase-title">Deploy (ဖြန့်ကြက်ချထားခြင်း အဆင့်)</h2>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.7; margin-bottom: 2rem;">
+        စစ်ဆေးပြီးသော အချောထည် Application များကို Infrastructure ပေါ်သို့ အောင်မြင်စွာ တင်ပို့သည့် အဆင့် ဖြစ်ပါသည်။
+      </p>
+
+      <div class="category">
+        <h3 class="category-title">Config Mgmt. / Provisioning (အခြေခံအဆောက်အအုံ ပြင်ဆင်တည်ဆောက်ခြင်း)</h3>
+        <p class="category-desc">အဓိပ္ပာယ်: ဆာဗာများ၊ VPC Networks၊ Cloud Disks များကို Code ရေး၍ အလိုအလျောက် ဆောက်ပေးခြင်း (IaC) နှင့် OS ဆက်တင်များကို ပြင်ဆင်ခြင်း ဖြစ်သည်။</p>
+        <div class="category-tools">
+          <span class="tool-tag">Terraform</span>
+          <span class="tool-tag">OpenTofu</span>
+          <span class="tool-tag">Ansible</span>
+          <span class="tool-tag">Puppet</span>
+          <span class="tool-tag">Chef</span>
+          <span class="tool-tag">Vagrant</span>
+          <span class="tool-tag">SaltStack</span>
+        </div>
+      </div>
+
+      <div class="category">
+        <h3 class="category-title">Artefact Management (အချောထည် ပစ္စည်းများ သိမ်းဆည်းခြင်း)</h3>
+        <p class="category-desc">အဓိပ္ပာယ်: Build အဆင့်မှ ထွက်လာသော Docker Images, Helm Charts, Binaries များကို လုံခြုံစွာ Version တပ်ပြီး သိမ်းဆည်းထားသော ဗဟို Package Registry ဖြစ်သည်။</p>
+        <div class="category-tools">
+          <span class="tool-tag">Docker Hub</span>
+          <span class="tool-tag">Harbor</span>
+          <span class="tool-tag">Quay</span>
+          <span class="tool-tag">JFrog Artifactory</span>
+          <span class="tool-tag">Sonatype Nexus</span>
+          <span class="tool-tag">npm registry</span>
+          <span class="tool-tag">NuGet</span>
+        </div>
+      </div>
+
+      <div class="category">
+        <h3 class="category-title">Deployment (ဖြန့်ကြက်ခြင်း လုပ်ငန်းစဉ် အင်ဂျင်)</h3>
+        <p class="category-desc">အဓိပ္ပာယ်: Artefact Management ထဲမှ Package များကို ဆွဲယူပြီး Target Servers များ သို့မဟုတ် Kubernetes Clusters ပေါ်သို့ Zero-downtime (Rolling, Blue-Green, Canary) ဖြင့် တင်ပို့ပေးသော Orchestrator ဖြစ်သည်။</p>
+        <div class="category-tools">
+          <span class="tool-tag">ArgoCD</span>
+          <span class="tool-tag">FluxCD</span>
+          <span class="tool-tag">Spinnaker</span>
+          <span class="tool-tag">Octopus Deploy</span>
+          <span class="tool-tag">Capistrano</span>
+          <span class="tool-tag">Rundeck</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="phase-section">
+      <div class="phase-header">
+        <span class="phase-number">05</span>
+        <h2 class="phase-title">Run (အမှန်တကယ် လည်ပတ်ခြင်းနှင့် စောင့်ကြည့်ခြင်း အဆင့်)</h2>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.7; margin-bottom: 2rem;">
+        Application များ အင်တာနက်ပေါ်တွင် သုံးစွဲသူများအတွက် 24/7 တည်ငြိမ်စွာ အသက်ရှင် လည်ပတ်နေစေရန် စီမံထိန်းသိမ်းသည့် အဆင့် ဖြစ်ပါသည်။
+      </p>
+
+      <div class="category">
+        <h3 class="category-title">Cloud / IaaS / PaaS (အခြေခံ ကွန်ပျူတာ စွမ်းအင် ပံ့ပိုးမှု)</h3>
+        <p class="category-desc">အဓိပ္ပာယ်: ဆာဗာများ၊ Storage များနှင့် ဒေတာစင်တာများကို ငှားရမ်း အသုံးပြုသော Cloud ပလက်ဖောင်းများ ဖြစ်သည်။</p>
+        <div class="category-tools">
+          <span class="tool-tag">AWS</span>
+          <span class="tool-tag">Google Cloud Platform (GCP)</span>
+          <span class="tool-tag">Microsoft Azure</span>
+          <span class="tool-tag">DigitalOcean</span>
+          <span class="tool-tag">OpenStack</span>
+          <span class="tool-tag">Heroku</span>
+          <span class="tool-tag">OpenShift</span>
+        </div>
+      </div>
+
+      <div class="category">
+        <h3 class="category-title">Orchestration & Scheduling (ကွန်တိနာ စီမံခန့်ခွဲမှု အင်ဂျင်)</h3>
+        <p class="category-desc">အဓိပ္ပာယ်: Container ပေါင်း ရာနှင့်ချီကို ဆာဗာအလုံးပေါင်းများစွာ ပေါ်တွင် မျှဝေပြေးဆွဲပေးခြင်း၊ ပျက်ကျသွားပါက အလိုအလျောက် ပြန်လဲပေးခြင်း (Self-healing)၊ Auto-scaling ပြုလုပ်ပေးခြင်းတို့ကို တာဝန်ယူသော ဦးနှောက် ဖြစ်သည်။</p>
+        <div class="category-tools">
+          <span class="tool-tag">Kubernetes (K8s)</span>
+          <span class="tool-tag">Docker Swarm</span>
+          <span class="tool-tag">HashiCorp Nomad</span>
+          <span class="tool-tag">Apache Mesos</span>
+          <span class="tool-tag">Rancher</span>
+        </div>
+      </div>
+
+      <div class="category">
+        <h3 class="category-title">BI / Monitoring / Logging / APM (စောင့်ကြည့်ခြင်း၊ မှတ်တမ်းယူခြင်းနှင့် သတိပေးခြင်း)</h3>
+        <p class="category-desc">အဓိပ္ပာယ်: ဆာဗာ ကျမကျ၊ CPU/RAM ပြည့်မပြည့်၊ Error Log များနှင့် Network Traffic များကို အချိန်နှင့်တစ်ပြေးညီ စောင့်ကြည့်၍ သတိပေးချက် (Alerting) ထုတ်ပေးသော မျက်စိနှင့် နား ဖြစ်သည်။</p>
+        <div class="category-tools">
+          <span class="tool-tag">Metrics & Dashboard: Prometheus, Grafana, Datadog, Zabbix</span>
+          <span class="tool-tag">Log Aggregation: ELK Stack, Grafana Loki, Splunk</span>
+          <span class="tool-tag">APM & Tracing: New Relic, Dynatrace, Jaeger, Sentry</span>
+          <span class="tool-tag">Incident Management: PagerDuty, Opsgenie</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="phase-section">
+      <h2 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem;">နှိုင်းယှဉ်ချက် အကျဉ်းချုပ် ဇယား (DevOps Phase vs. Output)</h2>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Phase</th>
+            <th>အဓိက လုပ်ဆောင်ချက်</th>
+            <th>အဓိက ထွက်ပေါ်လာသော Output</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>၁။ Collaborate</td>
+            <td>စီမံကိန်း ရေးဆွဲခြင်း၊ ပြဿနာများ ခွဲခြမ်းခြင်း</td>
+            <td>User Stories, Tasks, System Architecture Docs</td>
+          </tr>
+          <tr>
+            <td>၂။ Build</td>
+            <td>Code ပေါင်းစည်းခြင်း၊ Package ထုပ်ခြင်း</td>
+            <td>Versioned Source Code, Docker Images, Binaries</td>
+          </tr>
+          <tr>
+            <td>၃။ Test</td>
+            <td>အရည်အသွေး၊ လုံခြုံရေးနှင့် ဝန်ခံနိုင်ရည် စစ်ခြင်း</td>
+            <td>Test Pass/Fail Reports, Security Vulnerability Scans</td>
+          </tr>
+          <tr>
+            <td>၄။ Deploy</td>
+            <td>Server တည်ဆောက်ခြင်း၊ App တင်ပို့ခြင်း</td>
+            <td>Running Infrastructure, Applied Helm Releases</td>
+          </tr>
+          <tr>
+            <td>၅။ Run</td>
+            <td>Application လည်ပတ်ခြင်း၊ ပြဿနာ စောင့်ကြည့်ခြင်း</td>
+            <td>Real-time Metrics, Error Logs, Alert Notifications</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="senior-section">
+      <h3>Senior DevOps & SRE များသာ နားလည်သော အချက်များ (What Only Seniors Understand)</h3>
+      <p><strong>DevOps is a Culture, Not Just Tools (တူးလ်များ၏ နောက်ကွယ်မှ အမှန်တရား):</strong></p>
+      <p>အတွေ့အကြုံနုနယ်သူများသည် Tool အသစ်များကို စုံလင်စွာ သုံးနိုင်ခြင်းကို DevOps ဟု ထင်တတ်ကြသည်။ တကယ်တမ်းတွင် Senior များသည် "The Feedback Loop" (တုံ့ပြန်မှု စက်ဝန်း တိုတောင်းခြင်း) ကိုသာ ဦးတည်ကြသည်။ Run အဆင့်ရှိ Monitoring (Grafana/Sentry) မှ တွေ့ရှိသော Error သည် Collaborate အဆင့်ရှိ JIRA သို့ မိနစ်ပိုင်းအတွင်း အလိုအလျောက် ပြန်ရောက်ကာ Fix လုပ်နိုင်သော စနစ်မျိုး တည်ဆောက်ခြင်းကသာ DevOps ၏ တကယ့် အနှစ်သာရ ဖြစ်ပါသည်။</p>
+      
+      <p><strong>GitOps vs Traditional Deployment:</strong></p>
+      <p>ပုံထဲရှိ Deploy အဆင့်တွင် Jenkins သို့မဟုတ် Rundeck ကဲ့သို့ Tool များက ဆာဗာထဲသို့ SSH ဝင်ပြီး Push လုပ်သော ပုံစံဟောင်းအစား၊ ယနေ့ခေတ် ခေတ်သစ် အင်ဂျင်နီယာများသည် GitOps (ArgoCD / FluxCD) ကို သုံးကြသည်။ Git repository ကို Single Source of Truth အဖြစ် ထားရှိပြီး Kubernetes အတွင်းရှိ Agent က Git ထဲရှိ အပြောင်းအလဲများကို အလိုအလျောက် Pull ဆွဲတင်သည့် စနစ်သို့ ကူးပြောင်းသွားပါပြီ။</p>
+    </div>
+
+    <div class="mistakes-section">
+      <h3>သတိထားရန်နှင့် အမှားများ (Mistakes to Avoid)</h3>
+      <p><strong>Tool Fatigue (မလိုအပ်ဘဲ Tool များကို အလွန်အကျွံ သုံးစွဲခြင်း):</strong></p>
+      <p>Project တစ်ခုအတွက် Tool တစ်ခုစီတိုင်းကို လိုက်ထည့်ပါက Maintenance ကုန်ကျစရိတ် မြင့်တက်လာပြီး System ရှုပ်ထွေးသွားတတ်သည်။ Team ၏ အရွယ်အစားနှင့် လိုက်ဖက်သော Toolchain (ဥပမာ- GitHub တစ်ခုတည်းတွင် SCM, JIRA အစား Issues, CI အစား GitHub Actions, Registry အစား GHCR ပေါင်းစပ်သုံးခြင်း) ကိုသာ ရွေးချယ်သင့်ပါသည်။</p>
+      
+      <p><strong>Skipping the "Test" Gate:</strong></p>
+      <p>အချိန်လုရသည်ဟုဆိုကာ CI Pipeline တွင် Unit Test နှင့် Security Scan ကို ကျော်ခွပြီး Build ပြီးသည်နှင့် Deploy သို့ တိုက်ရိုက် ပို့မိပါက Production ပေါ်တွင် Fatal Error များ တက်ကာ Data Corruption ဖြစ်ပေါ်တတ်ပါသည်။</p>
+    </div>
+
+    <div class="references-section">
+      <h3>📚 Official Documentation & References</h3>
+      <a href="https://aws.amazon.com/devops/what-is-devops/" target="_blank">DevOps Foundation Principles (AWS)</a>
+      <a href="https://about.gitlab.com/topics/devops/devops-lifecycle/" target="_blank">GitLab Complete DevOps Lifecycle Guide</a>
+      <a href="https://landscape.cncf.io/" target="_blank">CNCF Cloud Native Interactive Landscape</a>
+    </div>
+
+    <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+      <a href="index.html" class="btn btn-outline">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Home
+      </a>
+    </div>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // Clock
+    function updateClock() {
+      const now = new Date();
+      const opts = { weekday:'short', year:'numeric', month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false };
+      document.getElementById('clock').textContent = now.toLocaleDateString('en-GB', opts).replace(',', '');
+    }
+    setInterval(updateClock, 1000); updateClock();
+
+    // Theme
+    const html = document.documentElement;
+    const themeBtn = document.getElementById('theme-toggle');
+    const storedTheme = localStorage.getItem('theme');
+    if(storedTheme) html.setAttribute('data-theme', storedTheme);
+    themeBtn.addEventListener('click', () => {
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      updateColors(next);
+    });
+
+    // 3D Background
+    const cvs = document.getElementById('bg3d');
+    const gl = new THREE.WebGLRenderer({canvas:cvs, alpha:true, antialias:true});
+    gl.setSize(window.innerWidth, window.innerHeight);
+    gl.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const scene = new THREE.Scene();
+    const cam = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
+    cam.position.z = 40;
+    const count = 140;
+    const geo = new THREE.BufferGeometry();
+    const pos = new Float32Array(count*3);
+    const vel = [];
+    for(let i=0; i<count; i++){
+      pos[i*3]=(Math.random()-0.5)*70; pos[i*3+1]=(Math.random()-0.5)*70; pos[i*3+2]=(Math.random()-0.5)*30;
+      vel.push({x:(Math.random()-0.5)*0.01, y:(Math.random()-0.5)*0.01, z:(Math.random()-0.5)*0.01});
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const ptsMat = new THREE.PointsMaterial({color:0x3b82f6, size:0.25, transparent:true, opacity:0.6, sizeAttenuation:true});
+    const pts = new THREE.Points(geo, ptsMat); scene.add(pts);
+    const lnGeo = new THREE.BufferGeometry();
+    const lnMat = new THREE.LineBasicMaterial({color:0x3b82f6, transparent:true, opacity:0.12});
+    const lnMesh = new THREE.LineSegments(lnGeo, lnMat); scene.add(lnMesh);
+
+    function updateColors(t) {
+      const c = t === 'light' ? 0x2563eb : 0x3b82f6;
+      ptsMat.color.setHex(c); lnMat.color.setHex(c); lnMat.opacity = t==='light'?0.15:0.12;
+    }
+
+    let mx=0, my=0;
+    window.addEventListener('mousemove', e => { mx=(e.clientX/window.innerWidth)*2-1; my=-(e.clientY/window.innerHeight)*2+1; });
+    window.addEventListener('resize', () => { cam.aspect=window.innerWidth/window.innerHeight; cam.updateProjectionMatrix(); gl.setSize(window.innerWidth, window.innerHeight); });
+
+    function anim(){
+      requestAnimationFrame(anim);
+      const p = geo.attributes.position.array;
+      const lp = [];
+      for(let i=0; i<count; i++){
+        p[i*3]+=vel[i].x; p[i*3+1]+=vel[i].y; p[i*3+2]+=vel[i].z;
+        if(Math.abs(p[i*3])>35) p[i*3]*=-1; if(Math.abs(p[i*3+1])>35) p[i*3+1]*=-1; if(Math.abs(p[i*3+2])>15) p[i*3+2]*=-1;
+        for(let j=i+1; j<count; j++){
+          const dx=p[i*3]-p[j*3], dy=p[i*3+1]-p[j*3+1], dz=p[i*3+2]-p[j*3+2];
+          const d=Math.sqrt(dx*dx+dy*dy+dz*dz);
+          if(d<15) lp.push(p[i*3],p[i*3+1],p[i*3+2],p[j*3],p[j*3+1],p[j*3+2]);
+        }
+      }
+      geo.attributes.position.needsUpdate = true;
+      lnGeo.setAttribute('position', new THREE.Float32BufferAttribute(lp, 3));
+      cam.position.x+=(mx*4-cam.position.x)*0.02;
+      cam.position.y+=(my*4-cam.position.y)*0.02;
+      cam.lookAt(0,0,0);
+      gl.render(scene, cam);
+    }
+    anim();
+    updateColors(html.getAttribute('data-theme') || 'dark');
+  </script>
+</body>
+</html>

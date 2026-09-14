@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Provisioning and Artifact Management in DevOps Architecture | Lin Htut Kyaw</title>
+  <link rel="shortcut icon" href="profile.jpg" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/index.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.1.0/index.min.css">
+  <style>
+    :root {
+      --bg: #050507;
+      --bg-panel: #0d0d11;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --accent: #3b82f6;
+      --border: rgba(255, 255, 255, 0.06);
+      --font-main: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+      --header-h: 60px;
+    }
+    [data-theme="light"] {
+      --bg: #fafafa;
+      --bg-panel: #ffffff;
+      --text: #09090b;
+      --text-muted: #52525b;
+      --accent: #2563eb;
+      --border: rgba(0, 0, 0, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-main); transition: background 0.4s, color 0.4s; overflow-x: hidden; }
+    
+    #bg3d { position: fixed; inset: 0; z-index: -1; opacity: 0.5; pointer-events: none; }
+    
+    header {
+      position: fixed; top: 0; left: 0; right: 0; height: var(--header-h);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 clamp(1.5rem, 4vw, 4rem);
+      background: rgba(var(--bg), 0.75);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      transition: background 0.4s;
+    }
+    .clock { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.05em; }
+    .nav { display: flex; gap: 1.5rem; align-items: center; }
+    .nav a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.2s; }
+    .nav a:hover { color: var(--accent); }
+    .actions { display: flex; gap: 0.5rem; align-items: center; }
+    .btn-icon {
+      width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+      border-radius: 8px; background: transparent; border: 1px solid var(--border);
+      color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+    }
+    .btn-icon:hover { background: var(--bg-panel); color: var(--accent); border-color: var(--accent); }
+
+    main { padding-top: calc(var(--header-h) + 4rem); max-width: 900px; margin: 0 auto; padding-inline: clamp(1.5rem, 4vw, 4rem); padding-bottom: 6rem; }
+    
+    .article-header { margin-bottom: 3rem; }
+    .article-header h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; line-height: 1.1; margin-bottom: 1rem; }
+    .article-meta { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .article-meta span { display: inline-block; margin-right: 1.5rem; }
+    
+    .btn { padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 500; text-decoration: none; transition: all 0.2s; cursor: pointer; border: none; font-family: inherit; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { filter: brightness(1.1); transform: translateY(-2px); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--text); background: rgba(128,128,128,0.04); }
+
+    .content-section { margin-bottom: 3rem; }
+    .section-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 1rem; color: var(--text); }
+    .section-desc { color: var(--text-muted); font-size: 0.95rem; line-height: 1.7; margin-bottom: 1.5rem; }
+    
+    .subsection { margin-bottom: 2rem; padding-left: 1.5rem; border-left: 3px solid var(--border); }
+    .subsection-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text); }
+    .subsection-desc { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 0.8rem; }
+    
+    .tool-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .tool-tag { 
+      padding: 0.3rem 0.7rem; background: var(--bg-panel); border: 1px solid var(--border); 
+      border-radius: 6px; font-family: var(--font-mono); font-size: 0.75rem; 
+      color: var(--text-muted); transition: 0.2s;
+    }
+    .tool-tag:hover { border-color: var(--accent); color: var(--accent); }
+
+    .comparison-table { 
+      width: 100%; border-collapse: collapse; margin: 2rem 0; 
+      background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+    }
+    .comparison-table th, .comparison-table td { 
+      padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); 
+    }
+    .comparison-table th { 
+      background: var(--bg); font-weight: 600; font-size: 0.85rem; 
+      color: var(--text-muted); font-family: var(--font-mono);
+    }
+    .comparison-table tr:last-child td { border-bottom: none; }
+    .comparison-table td { font-size: 0.9rem; color: var(--text-muted); }
+    .comparison-table td:first-child { font-weight: 600; color: var(--text); }
+
+    .senior-section { 
+      background: var(--bg-panel); border: 1px solid var(--border); 
+      border-radius: 12px; padding: 2rem; margin: 3rem 0;
+    }
+    .senior-section h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent); }
+    .senior-section p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 1rem; }
+    .senior-section ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+    .senior-section li { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 0.5rem; }
+
+    .mistakes-section { 
+      background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); 
+      border-radius: 12px; padding: 2rem; margin: 3rem 0;
+    }
+    .mistakes-section h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; color: #ef4444; }
+    .mistakes-section p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 1rem; }
+
+    .references-section { 
+      background: var(--bg-panel); border: 1px solid var(--border); 
+      border-radius: 12px; padding: 1.5rem; margin: 3rem 0;
+    }
+    .references-section h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; }
+    .references-section a { 
+      display: block; color: var(--accent); text-decoration: none; 
+      font-size: 0.9rem; margin-bottom: 0.5rem; transition: 0.2s;
+    }
+    .references-section a:hover { text-decoration: underline; }
+
+    .flow-diagram { 
+      background: var(--bg-panel); border: 1px solid var(--border); 
+      border-radius: 12px; padding: 2rem; margin: 2rem 0; font-family: var(--font-mono);
+      font-size: 0.85rem; color: var(--text-muted); line-height: 1.8; overflow-x: auto;
+    }
+
+    @media(max-width: 768px) {
+      .nav { display: none; }
+      .comparison-table { font-size: 0.8rem; }
+      .comparison-table th, .comparison-table td { padding: 0.75rem 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg3d"></canvas>
+
+  <header>
+    <div class="clock" id="clock">00:00:00</div>
+    <nav class="nav">
+      <a href="index.html">Home</a>
+      <a href="#about">About</a>
+      <a href="#experience">Experience</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="actions">
+      <a href="https://github.com/Ch4Rmn" target="_blank" class="btn-icon" aria-label="GitHub">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+      </a>
+      <button class="btn-icon" id="theme-toggle" aria-label="Toggle theme">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div class="article-header">
+      <a href="index.html" class="btn btn-outline" style="margin-bottom: 1.5rem;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Home
+      </a>
+      <h1>Provisioning and Artifact Management in DevOps Architecture and CI/CD Pipelines</h1>
+      <div class="article-meta">
+        <span>📅 Monday, September 14, 2026, 10:30 AM (Asia/Yangon)</span>
+        <span>🏷️ DevOps, CI/CD, Infrastructure</span>
+      </div>
+    </div>
+
+    <section style="margin-bottom: 3rem;">
+      <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.8; margin-bottom: 1.5rem;">
+        DevOps အခင်းအကျင်းတွင် Application တစ်ခုကို ရေးသားပြီး ရလဒ်ထွက်လာသည်မှ စတင်၍ သုံးစွဲသူများ လက်ထဲသို့ ရောက်ရှိသည်အထိ အလိုအလျောက် ပို့ဆောင်ပေးရာ၌ Provisioning နှင့် Artifact Management သည် မရှိမဖြစ် လိုအပ်သော ကျောရိုးအစိတ်အပိုင်း (၂) ခု ဖြစ်ကြပါသည်။
+      </p>
+    </section>
+
+    <section class="content-section">
+      <h2 class="section-title">၁။ Provisioning ဆိုတာ ဘာလဲ (What is Provisioning?)</h2>
+      <p class="section-desc">
+        DevOps တွင် Provisioning ဆိုသည်မှာ အက်ပလီကေးရှင်းတစ်ခု သို့မဟုတ် ဆော့ဖ်ဝဲလ်တစ်ခု ကောင်းမွန်စွာ အလုပ်လုပ်နိုင်ရန်အတွက် လိုအပ်သော အခြေခံအဆောက်အအုံ (Infrastructure)၊ ကွန်ရက် (Network)၊ ဆာဗာ (Servers) နှင့် စနစ်သုံး ပစ္စည်းများအားလုံးကို အဆင်သင့်ဖြစ်အောင် ပြင်ဆင်၊ သတ်မှတ်၊ တည်ဆောက်ပေးသည့် လုပ်ငန်းစဉ် ဖြစ်ပါသည်။
+      </p>
+      <p class="section-desc">
+        အတိတ်ကာလတွင် System Administrator များသည် ဆာဗာစက်သစ်များကို Datacenter ထဲတွင် Manual တပ်ဆင်ခြင်း၊ OS တင်ခြင်း၊ IP သတ်မှတ်ခြင်းတို့ကို လက်ဖြင့် လုပ်ဆောင်ခဲ့ရသော်လည်း ခေတ်သစ် DevOps တွင်မူ အရာအားလုံးကို Code ရေးသား၍ Command တစ်ချက်တည်းဖြင့် စက္ကန့်ပိုင်းအတွင်း အလိုအလျောက် ပြုလုပ်ကြပါသည် (Infrastructure as Code - IaC)။
+      </p>
+
+      <h3 style="font-size: 1.2rem; font-weight: 600; margin: 2rem 0 1rem;">Provisioning အမျိုးအစားများ (Types of Provisioning)</h3>
+      
+      <div class="subsection">
+        <h4 class="subsection-title">Server / Cloud Provisioning</h4>
+        <p class="subsection-desc">AWS, Google Cloud, DigitalOcean ကဲ့သို့သော Cloud Platform များပေါ်တွင် Virtual Machines (EC2 instances), Kubernetes Clusters (EKS/DOKS) သို့မဟုတ် Bare-metal server များကို အလိုအလျောက် တည်ဆောက်ပေးခြင်း။</p>
+      </div>
+
+      <div class="subsection">
+        <h4 class="subsection-title">Network Provisioning</h4>
+        <p class="subsection-desc">ဆာဗာများ အချင်းချင်း ဆက်သွယ်နိုင်ရန် Virtual Private Cloud (VPC), Subnets, IP addresses, Firewalls (Security Groups) နှင့် DNS records များကို ဖွဲ့စည်းပေးခြင်း။</p>
+      </div>
+
+      <div class="subsection">
+        <h4 class="subsection-title">Storage Provisioning</h4>
+        <p class="subsection-desc">Kubernetes အတွင်း သင်တွေ့ကြုံခဲ့ရသလို Database များ သို့မဟုတ် App များအတွက် Persistent Volume (PV), AWS EBS, NFS Server သို့မဟုတ် Object Storage (S3) များကို လိုအပ်သလို သတ်မှတ် ချထားပေးခြင်း (Static/Dynamic Provisioning)။</p>
+      </div>
+
+      <div class="subsection">
+        <h4 class="subsection-title">User / Access Provisioning</h4>
+        <p class="subsection-desc">ဝန်ထမ်းများ သို့မဟုတ် Pod များအတွက် IAM Roles, ServiceAccounts, RBAC Permissions များကို ထုတ်ပေးခြင်း။</p>
+      </div>
+
+      <h3 style="font-size: 1.2rem; font-weight: 600; margin: 2rem 0 1rem;">အသုံးအများဆုံး Provisioning Tools များ</h3>
+      <div class="tool-tags">
+        <span class="tool-tag">Infrastructure as Code (IaC): Terraform, OpenTofu, AWS CloudFormation, Pulumi</span>
+        <span class="tool-tag">Configuration Management: Ansible, Chef, Puppet</span>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2 class="section-title">၂။ Artifact Management ဆိုတာ ဘာလဲ (What is Artifact Management?)</h2>
+      <p class="section-desc">
+        DevOps CI/CD Pipeline တွင် Artifact ဆိုသည်မှာ Source Code (PHP, Java, Go, Dart စသည်) ကို Build လုပ်ပြီးနောက်၊ Compile လုပ်ပြီးနောက် သို့မဟုတ် Test စစ်ဆေးပြီးနောက် ထွက်ပေါ်လာသည့် "Deploy ပြုလုပ်ရန် အသင့်ဖြစ်နေသော အချောထည် Output ဖိုင်များ (Packaged Binaries / Images / Archives)" ကို ခေါ်ဆိုခြင်း ဖြစ်ပါသည်။
+      </p>
+      <p class="section-desc">
+        ထို့ကြောင့် Artifact Management ဆိုသည်မှာ အဆိုပါ အချောထည် Software Packages များကို လုံခြုံစွာ သိမ်းဆည်းခြင်း၊ ဗားရှင်းနံပါတ်များ တပ်ဆင်၍ သမိုင်းကြောင်း ထိန်းသိမ်းခြင်း (Versioning)၊ Vulnerability စစ်ဆေးခြင်း (Security Scanning) နှင့် Kubernetes သို့မဟုတ် Server များပေါ်သို့ အချိန်မရွေး လှမ်းဆွဲတင်နိုင်အောင် စီမံခန့်ခွဲပေးသည့် စနစ် (Registry) ဖြစ်ပါသည်။
+      </p>
+
+      <h3 style="font-size: 1.2rem; font-weight: 600; margin: 2rem 0 1rem;">အဓိက Artifact အမျိုးအစားများ (Types of Artifacts)</h3>
+      
+      <div class="subsection">
+        <h4 class="subsection-title">Container Images</h4>
+        <p class="subsection-desc">Docker Images / OCI Images (ဥပမာ- `my-app:v1.0.0`, `bitnami/wordpress`)</p>
+      </div>
+
+      <div class="subsection">
+        <h4 class="subsection-title">Package Archives / Charts</h4>
+        <p class="subsection-desc">Kubernetes Helm Charts (`my-chart-0.1.0.tgz`), Debian Packages (`.deb`), RedHat (`.rpm`)</p>
+      </div>
+
+      <div class="subsection">
+        <h4 class="subsection-title">Compiled Language Binaries</h4>
+        <p class="subsection-desc">Go compiled binaries, Rust binaries, Java `.jar` / `.war` ဖိုင်များ</p>
+      </div>
+
+      <div class="subsection">
+        <h4 class="subsection-title">Language Dependencies</h4>
+        <p class="subsection-desc">PHP Composer packages, Node.js NPM `.tgz` packages, Python Wheels (`.whl`)</p>
+      </div>
+
+      <h3 style="font-size: 1.2rem; font-weight: 600; margin: 2rem 0 1rem;">အသုံးအများဆုံး Artifact Management Tools များ (Registries)</h3>
+      <div class="tool-tags">
+        <span class="tool-tag">Enterprise Universal Registries: JFrog Artifactory, Sonatype Nexus</span>
+        <span class="tool-tag">Cloud Native Registries: Harbor, AWS ECR, Google Artifact Registry, GitHub Packages / GHCR</span>
+        <span class="tool-tag">Helm Hubs: Artifact Hub, ChartMuseum</span>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2 class="section-title">၃။ CI/CD Pipeline ထဲတွင် ၎င်းတို့ (၂) ခု ပေါင်းစပ် အလုပ်လုပ်ပုံ (End-to-End Workflow)</h2>
+      
+      <div class="flow-diagram">
+======================= CI (CONTINUOUS INTEGRATION) =======================
+[ Developer Git Push ] 
+          │
+          ▼ (GitHub Actions / GitLab CI)
+[ Compile / Build & Run Automated Tests ]
+          │
+          ▼ (Build Docker Image & Package Helm Chart)
+[ Push to ARTIFACT MANAGEMENT ]  <==== Store: my-app:v1.2.0 & helm-chart:0.1.0
+  (Harbor / AWS ECR / Artifactory)       (Vulnerability Scanning, Immutable Versioning)
+
+======================= CD (CONTINUOUS DEPLOYMENT) =======================
+          │
+          ▼
+[ PROVISIONING LAYER ]           <==== Terraform creates AWS EKS, VPC, Security Groups
+  (Infrastructure Ready)               (or Dynamic Storage Provisioning for PVC)
+          │
+          ▼
+[ Deployment via Helm / Kubectl ] <==== Pulls Docker Image & Helm Chart from Artifact Manager
+          │
+          ▼
+[ Running Kubernetes Cluster ]
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2 class="section-title">၄။ နှိုင်းယှဉ်ချက် အကျဉ်းချုပ် ဇယား (Provisioning vs. Artifact Management)</h2>
+      
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>အချက်အလက်</th>
+            <th>Provisioning</th>
+            <th>Artifact Management</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>အဓိက တာဝန်</td>
+            <td>ဆာဗာ၊ ကွန်ရက်နှင့် သိုလှောင်မှု အခြေခံအဆောက်အအုံကို တည်ဆောက်ပြင်ဆင်ပေးခြင်း</td>
+            <td>အချောထည် Software Packages နှင့် Container Images များကို သိမ်းဆည်း၊ ဗားရှင်းထိန်းသိမ်းပေးခြင်း</td>
+          </tr>
+          <tr>
+            <td>ကိုင်တွယ်သောအရာ</td>
+            <td>Servers, VPC, Subnets, EBS/NFS, IAM Roles, Kubernetes Clusters</td>
+            <td>Docker Images, Helm Charts, `.jar`, `.tar.gz`, Binaries</td>
+          </tr>
+          <tr>
+            <td>ပစ်မှတ်နေရာ</td>
+            <td>AWS, GCP, DigitalOcean, Multipass, Hardware</td>
+            <td>Docker Hub, AWS ECR, Harbor, JFrog Artifactory, GHCR</td>
+          </tr>
+          <tr>
+            <td>အချိန်ကာလ</td>
+            <td>System Setup ပြုလုပ်ချိန် သို့မဟုတ် Cluster တိုးချဲ့ချိန် (Scale out)</td>
+            <td>Code အသစ်တစ်ခုစီ Build ပြီးတိုင်း (Continuous Delivery)</td>
+          </tr>
+          <tr>
+            <td>ဥပမာ ကိရိယာများ</td>
+            <td>Terraform, Ansible, `eksctl`, CloudFormation</td>
+            <td>Docker Registry, Harbor, Nexus, Artifactory</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="senior-section">
+      <h3>၅။ Senior DevOps & SRE များသာ နားလည်သော အချက်များ (What Only Seniors Understand)</h3>
+      <p><strong>Immutability Principle (မပြောင်းလဲနိုင်သော စည်းကမ်းချက်):</strong></p>
+      <p>Artifact Management တွင် အရေးကြီးဆုံး စည်းမျဉ်းမှာ "Artifacts must be immutable" ဖြစ်သည်။ ဆိုလိုသည်မှာ Docker image tag `v1.0.0` သို့မဟုတ် Helm chart `0.1.0` ကို Artifact registry ပေါ်သို့ တစ်ကြိမ် Push ပြီးပါက ထို Tag အမည်တူဖြင့် နောက်တစ်ကြိမ် overwrite ထပ်ရေးခွင့်ကို လုံးဝ ပိတ်ထားရပါမည် (Docker tag `latest` ကို Production တွင် လုံးဝ မသုံးရသည့် အကြောင်းရင်း ဖြစ်သည်)။ အကယ်၍ Version တစ်ခုသည် immutable မဖြစ်ပါက Rollback ပြုလုပ်သည့်အခါ ယခင် bug ဟောင်းများ ပြန်ပါလာတတ်ပါသည်။</p>
+      
+      <p><strong>Golden Images & Baking vs. Runtime Provisioning:</strong></p>
+      <p>ဆာဗာအသစ်တက်လာတိုင်း `apt update && apt install` စသည်ဖြင့် Provisioning လုပ်ပါက အချိန် ၅ မိနစ်မှ ၁၀ မိနစ်အထိ ကြာမြင့်တတ်သည်။ Senior များသည် Packer ကဲ့သို့ tool များဖြင့် လိုအပ်သော packages အားလုံးကို ကြိုတင် Install လုပ်ထားသည့် AMI/Image (Golden Image) ကို တည်ဆောက်ပြီး Artifact အနေဖြင့် သိမ်းဆည်းထားကြသည်။ ထို့နောက် စက်ဖွင့်သည့်အခါ ထို Image ကို ချက်ချင်း Clone လုပ်ကာ စက္ကန့်ပိုင်းအတွင်း Provisioning ပြီးပြတ်စေပါသည်။</p>
+      
+      <p><strong>Vulnerability & Compliance Gatekeeper:</strong></p>
+      <p>ခေတ်သစ် Artifact Manager များ (ဥပမာ Harbor / AWS ECR) တွင် Trivy သို့မဟုတ် Clair ကဲ့သို့ Security Scanner များ ပါဝင်သည်။ Image တစ်ခုထဲတွင် Critical CVE (လုံခြုံရေး အားနည်းချက်) ပါဝင်နေပါက Kubernetes သို့မဟုတ် Production ဆာဗာများက အဆိုပါ Image ကို Pull ဆွဲခွင့် မရအောင် Registry အဆင့်တွင်ပင် ကြားဖြတ် ပိတ်ဆို့ (Quarantine) ပေးနိုင်ပါသည်။</p>
+    </div>
+
+    <div class="mistakes-section">
+      <h3>၆။ သတိထားရန်နှင့် အမှားများ (Mistakes to Avoid)</h3>
+      <p><strong>Artifact Registry တွင် Retention Policy (သက်တမ်းသတ်မှတ်ချက်) မထားရှိခြင်း:</strong></p>
+      <p>CI/CD pipeline က commit တိုင်းအတွက် Docker Image အသစ်များ အဆက်မပြတ် တင်နေပါက ရက်သတ္တပတ် အနည်းငယ်အတွင်း Registry ၏ Disk Space သည် Terabytes ချီ ပြည့်သွားပြီး Bill ကုန်ကျစရိတ် အဆမတန် မြင့်တက်သွားတတ်ပါသည်။ "နောက်ဆုံး Commit ၃၀ သို့မဟုတ် Tagged releases များကိုသာ သိမ်းဆည်းမည်" ဟူသော Auto-cleanup policy ကို မဖြစ်မနေ သတ်မှတ်ရပါမည်။</p>
+      
+      <p><strong>Configuration Drift in Provisioning:</strong></p>
+      <p>Terraform ဖြင့် ဆောက်ထားသော Infrastructure ကို အရေးပေါ်ဟုဆိုကာ AWS Console သို့မဟုတ် SSH ထဲမှ လက်ဖြင့် Manual သွားပြင်မိပါက Code နှင့် တကယ့်ဆာဗာကြား မညီမျှမှု (Drift) ဖြစ်ပေါ်ပြီး နောက်တစ်ကြိမ် Pipeline run သည့်အခါ စနစ်များ ပျက်စီးသွားတတ်ပါသည်။ ပြင်ဆင်မှုတိုင်းကို Code မှတစ်ဆင့်သာ Provisioning ပြုလုပ်ရပါမည်။</p>
+    </div>
+
+    <div class="references-section">
+      <h3>📚 Official Documentation & References</h3>
+      <a href="https://developer.hashicorp.com/terraform/intro" target="_blank">Terraform Infrastructure as Code Concept</a>
+      <a href="https://goharbor.io/docs/" target="_blank">Harbor Cloud Native Artifact Registry</a>
+      <a href="https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html" target="_blank">AWS Elastic Container Registry (ECR) User Guide</a>
+    </div>
+
+    <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+      <a href="index.html" class="btn btn-outline">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Home
+      </a>
+    </div>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // Clock
+    function updateClock() {
+      const now = new Date();
+      const opts = { weekday:'short', year:'numeric', month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false };
+      document.getElementById('clock').textContent = now.toLocaleDateString('en-GB', opts).replace(',', '');
+    }
+    setInterval(updateClock, 1000); updateClock();
+
+    // Theme
+    const html = document.documentElement;
+    const themeBtn = document.getElementById('theme-toggle');
+    const storedTheme = localStorage.getItem('theme');
+    if(storedTheme) html.setAttribute('data-theme', storedTheme);
+    themeBtn.addEventListener('click', () => {
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      updateColors(next);
+    });
+
+    // 3D Background
+    const cvs = document.getElementById('bg3d');
+    const gl = new THREE.WebGLRenderer({canvas:cvs, alpha:true, antialias:true});
+    gl.setSize(window.innerWidth, window.innerHeight);
+    gl.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const scene = new THREE.Scene();
+    const cam = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
+    cam.position.z = 40;
+    const count = 140;
+    const geo = new THREE.BufferGeometry();
+    const pos = new Float32Array(count*3);
+    const vel = [];
+    for(let i=0; i<count; i++){
+      pos[i*3]=(Math.random()-0.5)*70; pos[i*3+1]=(Math.random()-0.5)*70; pos[i*3+2]=(Math.random()-0.5)*30;
+      vel.push({x:(Math.random()-0.5)*0.01, y:(Math.random()-0.5)*0.01, z:(Math.random()-0.5)*0.01});
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const ptsMat = new THREE.PointsMaterial({color:0x3b82f6, size:0.25, transparent:true, opacity:0.6, sizeAttenuation:true});
+    const pts = new THREE.Points(geo, ptsMat); scene.add(pts);
+    const lnGeo = new THREE.BufferGeometry();
+    const lnMat = new THREE.LineBasicMaterial({color:0x3b82f6, transparent:true, opacity:0.12});
+    const lnMesh = new THREE.LineSegments(lnGeo, lnMat); scene.add(lnMesh);
+
+    function updateColors(t) {
+      const c = t === 'light' ? 0x2563eb : 0x3b82f6;
+      ptsMat.color.setHex(c); lnMat.color.setHex(c); lnMat.opacity = t==='light'?0.15:0.12;
+    }
+
+    let mx=0, my=0;
+    window.addEventListener('mousemove', e => { mx=(e.clientX/window.innerWidth)*2-1; my=-(e.clientY/window.innerHeight)*2+1; });
+    window.addEventListener('resize', () => { cam.aspect=window.innerWidth/window.innerHeight; cam.updateProjectionMatrix(); gl.setSize(window.innerWidth, window.innerHeight); });
+
+    function anim(){
+      requestAnimationFrame(anim);
+      const p = geo.attributes.position.array;
+      const lp = [];
+      for(let i=0; i<count; i++){
+        p[i*3]+=vel[i].x; p[i*3+1]+=vel[i].y; p[i*3+2]+=vel[i].z;
+        if(Math.abs(p[i*3])>35) p[i*3]*=-1; if(Math.abs(p[i*3+1])>35) p[i*3+1]*=-1; if(Math.abs(p[i*3+2])>15) p[i*3+2]*=-1;
+        for(let j=i+1; j<count; j++){
+          const dx=p[i*3]-p[j*3], dy=p[i*3+1]-p[j*3+1], dz=p[i*3+2]-p[j*3+2];
+          const d=Math.sqrt(dx*dx+dy*dy+dz*dz);
+          if(d<15) lp.push(p[i*3],p[i*3+1],p[i*3+2],p[j*3],p[j*3+1],p[j*3+2]);
+        }
+      }
+      geo.attributes.position.needsUpdate = true;
+      lnGeo.setAttribute('position', new THREE.Float32BufferAttribute(lp, 3));
+      cam.position.x+=(mx*4-cam.position.x)*0.02;
+      cam.position.y+=(my*4-cam.position.y)*0.02;
+      cam.lookAt(0,0,0);
+      gl.render(scene, cam);
+    }
+    anim();
+    updateColors(html.getAttribute('data-theme') || 'dark');
+  </script>
+</body>
+</html>
